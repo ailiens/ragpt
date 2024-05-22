@@ -9,6 +9,10 @@ import os
 
 dotenv.load_dotenv()
 
+# 현재 작업 디렉토리 확인
+current_directory = os.getcwd()
+st.write(f"현재 작업 디렉토리: {current_directory}")
+
 # Streamlit UI
 st.title("👩‍🚀RAGpt👩‍🚀")
 
@@ -17,33 +21,43 @@ st.sidebar.header("파일 또는 URL 사용하기")
 url_input = st.sidebar.text_input("URL 주소 입력:")
 uploaded_files = st.sidebar.file_uploader("파일을 업로드하세요.", type=["pdf", "docx", "txt"], accept_multiple_files=True)
 temperature = st.sidebar.slider('Temperature', min_value=0.0, max_value=1.0, value=0.0)
-top_k = st.sidebar.slider('Top K', min_value=1, max_value=10, value=1)
+top_k = st.sidebar.slider('Top K', min_value=1, max_value=10, value=3)  # 기본값 조정
+score_threshold = st.sidebar.slider('Score Threshold', min_value=0.0, max_value=1.0, value=0.5)  # 기본값 조정
+
 # 데이터 로드
 all_data = []
 
+
+def load_file(uploaded_file):
+    file_extension = os.path.splitext(uploaded_file.name)[1]
+    temp_file_path = os.path.join(current_directory, uploaded_file.name)
+
+    with open(temp_file_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+
+    if file_extension == ".pdf":
+        loader = PyPDFLoader(temp_file_path)
+    elif file_extension == ".docx":
+        loader = UnstructuredWordDocumentLoader(temp_file_path)
+    elif file_extension == ".txt":
+        loader = TextLoader(temp_file_path)
+    return loader.load()
+
+
 if uploaded_files:
     for uploaded_file in uploaded_files:
-        file_extension = os.path.splitext(uploaded_file.name)[1]
         start_time = time.time()
-        if file_extension == ".pdf":
-            with open(uploaded_file.name, "wb") as f:
-                f.write(uploaded_file.getbuffer())
-            loader = PyPDFLoader(uploaded_file.name)
-            data = loader.load()
-        elif file_extension == ".docx":
-            with open(uploaded_file.name, "wb") as f:
-                f.write(uploaded_file.getbuffer())
-            loader = UnstructuredWordDocumentLoader(uploaded_file.name)
-            data = loader.load()
-        elif file_extension == ".txt":
-            with open(uploaded_file.name, "wb") as f:
-                f.write(uploaded_file.getbuffer())
-            loader = TextLoader(uploaded_file.name)
-            data = loader.load()
-
+        data = load_file(uploaded_file)
+        for doc in data:
+            doc.metadata['source'] = uploaded_file.name
         load_time = time.time() - start_time
         st.sidebar.write(f"{uploaded_file.name} 파일 로드 시간: {load_time:.2f} 초")
         all_data.extend(data)
+
+    # 메타데이터 확인
+    st.sidebar.header("메타데이터 확인")
+    for i, doc in enumerate(all_data):
+        st.sidebar.write(f"문서 {i + 1} 메타데이터:", doc.metadata)
 
 elif url_input:
     start_time = time.time()
@@ -53,14 +67,22 @@ elif url_input:
     st.sidebar.write(f"URL 로드 시간: {load_time:.2f} 초")
     all_data.extend(data)
 
+# ChromaDB 저장 경로
+CHROMA_DB_PATH = "rag_db"
+
 # 데이터가 있는 경우 처리
 if all_data:
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=200)  # 분할 전략 개선
     all_splits = text_splitter.split_documents(all_data)
 
-    vectorstore = Chroma.from_documents(documents=all_splits, embedding=OpenAIEmbeddings())
+    # Chroma 인스턴스 생성 시 경로 지정
+    vectorstore = Chroma.from_documents(
+        documents=all_splits,
+        embedding=OpenAIEmbeddings(),
+        persist_directory=CHROMA_DB_PATH  # 데이터베이스 파일의 경로 지정
+    )
     retriever = vectorstore.as_retriever(search_type="similarity_score_threshold",
-                                         search_kwargs={"score_threshold": 0.6, 'k': top_k})
+                                         search_kwargs={"score_threshold": score_threshold, 'k': top_k})
 
     from langchain.agents.agent_toolkits import create_retriever_tool
 
@@ -142,10 +164,22 @@ if prompt := st.chat_input("Ask me in the document"):
         # 데이터를 사용하여 에이전트 실행
         if all_data:
             result = agent_executor({"input": prompt})
-            for chunk in result['output'].split():
-                full_response += chunk + " "
-                time.sleep(0.05)
-                message_placeholder.markdown(full_response + "▌")
+            full_response = result['output']
+            intermediate_steps = result.get('intermediate_steps', [])
+
+            # 출처 정보 추가
+            sources = []
+            for step in intermediate_steps:
+                if 'document' in step and 'metadata' in step['document']:
+                    metadata = step['document']['metadata']
+                    if 'source' in metadata and 'page' in metadata:
+                        sources.append(f"{metadata['source']} (page {metadata['page']})")
+                    elif 'source' in metadata:
+                        sources.append(f"{metadata['source']}")
+
+            source_info = "\n\n출처:\n" + "\n".join(sources) if sources else "\n\n출처 정보를 찾을 수 없습니다."
+            full_response += source_info
+
             message_placeholder.markdown(full_response)
         else:
             full_response = "Please upload file or valid URL for search information."
