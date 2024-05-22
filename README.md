@@ -9,5 +9,7 @@
 - 파일 업로드, URL 입력 을 통해 데이터 입력
 - Temperature 슬라이더 추가
 - Top_K 슬라이더 추가
+- Score Threshhold 슬라이더 추가
 
-![image](https://github.com/ailiens/ragpt/assets/141120294/fffca576-b6e4-4fc8-abc2-d93023611780)
+![image](https://github.com/ailiens/ragpt/assets/141120294/f6a9b807-c432-4a8d-9c82-d5e48035b5af)
+
