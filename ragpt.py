@@ -11,7 +11,7 @@ dotenv.load_dotenv()
 
 # 현재 작업 디렉토리 확인
 current_directory = os.getcwd()
-st.write(f"현재 작업 디렉토리: {current_directory}")
+#st.write(f"현재 작업 디렉토리: {current_directory}")
 
 # Streamlit UI
 st.title("👩‍🚀RAGpt👩‍🚀")
