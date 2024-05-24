@@ -1,7 +1,7 @@
 ### 강화 RAGpt 
 <br>
 In Progress...<br>
----
+<hr>
 **Purpose**<br>
 Simple RAG system to improve accuracy by reflecting answer revisions
   
