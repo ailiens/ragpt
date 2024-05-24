@@ -1,7 +1,9 @@
-### rag_구현해보기 
+### 강화 RAGpt 
+<br>
+In Progress...😶‍🌫️
 ---
 **Purpose**<br>
-Simple RAG System wtih reflect reply edit
+Simple RAG system to improve accuracy by reflecting answer revisions
   
 **Requirements**<br>
 
