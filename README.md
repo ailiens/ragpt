@@ -3,8 +3,8 @@
 In Progress...<br>
 <hr>
 **Purpose**<br>
-Simple RAG system to improve accuracy by reflecting answer revisions
-  
+Simple RAG system to improve accuracy by reflecting answer revisions<br>
+<hr>  
 **Requirements**<br>
 
 1.OpenAI API Key<br>
