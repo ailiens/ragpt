@@ -1,7 +1,7 @@
 ### rag_구현해보기 
 ---
-**Purpose**
-- Simple RAG System wtih reflect reply edit
+**Purpose**<br>
+Simple RAG System wtih reflect reply edit
   
 **Requirements**<br>
 
