@@ -1,11 +1,11 @@
 ### rag_구현해보기 
 ---
-진행순서<br>
+**Requirements**<br>
 
-1.OpenAI API Key 사용해서 진행  
-2.langchain 사용해서 구현  
-3.streamlit으로 구현  
-4.stremalit 배포  
+1.OpenAI API Key
+2.langchain 
+3.streamlit
+
 ---
 05.22 streamlit
 - 파일 업로드, URL 입력 을 통해 데이터 입력
