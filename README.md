@@ -2,9 +2,9 @@
 ---
 **Requirements**<br>
 
-1.OpenAI API Key
-2.langchain 
-3.streamlit
+1.OpenAI API Key<br>
+2.langchain<br> 
+3.streamlit<br>
 
 ---
 05.22 streamlit
