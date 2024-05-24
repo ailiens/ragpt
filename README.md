@@ -2,10 +2,12 @@
 <br>
 In Progress...<br>
 <hr>
-**Purpose**<br>
+**Purpose**
+<br>
 Simple RAG system to improve accuracy by reflecting answer revisions<br>
 <hr>  
-**Requirements**<br>
+**Requirements**
+<br>
 
 1.OpenAI API Key<br>
 2.langchain<br> 
