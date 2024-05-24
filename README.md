@@ -1,4 +1,4 @@
-### 강화 RAGpt 
+### 🦾Enhanced RAGpt🦾
 <br>
 In Progress...<br>
 <hr>
